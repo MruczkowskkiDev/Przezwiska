@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktywna Strona</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        button {
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #4834d4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Witaj na mojej stronie!</h1>
+    <p>Kliknij przycisk, aby zobaczyć wiadomość:</p>
+    <button onclick="pokazPowitanie()">Kliknij mnie!</button>
+    <p id="wiadomosc" style="margin-top: 20px; font-size: 18px; color: #333;"></p>
+
+    <script>
+        function pokazPowitanie() {
+            const wiadomosc = document.getElementById("wiadomosc");
+            wiadomosc.textContent = "Dzień dobry! Miło Cię widzieć!";
+        }
+    </script>
+</body>
+</html>
