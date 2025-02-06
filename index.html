@@ -4,102 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f8f8;
-            text-align: center;
-        }
-        table {
-            width: 60%;
-            margin: 20px auto;
-            border-collapse: separate;
-            border-spacing: 0;
-            background-color: #fff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 12px;
-            border: 2px solid black;
-            text-align: left;
-        }
-        th {
-            background-color: black;
-            color: white;
-            font-weight: bold;
-        }
-        td {
-            font-size: 16px;
-        }
-        .login-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            background-color: black;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .login-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-        }
-        .login-popup input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border: 2px solid black;
-            border-radius: 5px;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
 </head>
 <body>
-    <button class="login-btn" onclick="showLogin()">Logowanie</button>
 
-    <div class="login-popup" id="loginPopup">
-        <p>Podaj hasło:</p>
+    <button onclick="showLogin()">Logowanie</button>
+    <div id="loginPopup" style="display:none;">
         <input type="password" id="passwordInput" onkeypress="checkLogin(event)">
     </div>
 
     <h2>Lista uczniów</h2>
-    <table>
-        <tr>
-            <th>Imię</th>
-            <th>Nazwisko</th>
-            <th>Przezwisko</th>
-        </tr>
-        <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
-        <tr><td>Szymon</td><td>Cabaj</td><td class="nickname" data-user="gawron@3"></td></tr>
-        <tr><td>Szymon</td><td>Gorczyca</td><td class="nickname" data-user="optimusprime000"></td></tr>
-        <tr><td>Maks</td><td>Czaja</td><td class="nickname" data-user="twojastara2137"></td></tr>
-        <tr><td>Ania</td><td>Bochenek</td><td class="nickname" data-user="342"></td></tr>
-        <tr><td>Ania</td><td>Jezior</td><td class="nickname" data-user="sigmaboy"></td></tr>
+    <table border="1">
+        <tr><th>Imię</th><th>Nazwisko</th><th>Przezwisko</th></tr>
         <tr><td>Leon</td><td>Babicz</td><td class="nickname" data-user="abhaha123"></td></tr>
-        <tr><td>Leon</td><td>Wilczyński</td><td class="nickname" data-user="leonmadrame"></td></tr>
-        <tr><td>Wiktoria</td><td>Węglarz</td><td class="nickname" data-user="wikikapiek490"></td></tr>
-        <tr><td>Weronika</td><td>Roś</td><td class="nickname" data-user="kocham_energylandie"></td></tr>
-        <tr><td>Paulina</td><td>Kliś</td><td class="nickname" data-user="kotki2"></td></tr>
-        <tr><td>Jan</td><td>Tokarz</td><td class="nickname" data-user="lubieaudis3"></td></tr>
-        <tr><td>Gosia</td><td>-</td><td class="nickname" data-user="rypka14!"></td></tr>
-        <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
+        <tr><td>Ania</td><td>Bochenek</td><td class="nickname" data-user="342"></td></tr>
+        <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
     </table>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "TWOJE_API_KEY",
+            authDomain: "lista-przezwisk.firebaseapp.com",
+            databaseURL: "https://lista-przezwisk-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "lista-przezwisk",
+            storageBucket: "lista-przezwisk.appspot.com",
+            messagingSenderId: "TWOJE_MESSAGING_ID",
+            appId: "TWOJE_APP_ID"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
         let loggedInUser = null;
+
+        function loadNicknames() {
+            db.ref("nicknames").once("value", (snapshot) => {
+                let data = snapshot.val();
+                document.querySelectorAll(".nickname").forEach(td => {
+                    let user = td.dataset.user;
+                    td.textContent = data && data[user] ? data[user] : "";
+                });
+            });
+        }
 
         function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
@@ -112,18 +58,7 @@
                 const validUsers = {
                     "abhaha123": "Leon Babicz",
                     "mruczek": "Michał Ciepiela",
-                    "lubieaudis3": "Jan Tokarz",
-                    "rypka14!": "Gosia",
-                    "pulpecik06": "Zuzia Kosiba",
-                    "kocham_energylandie": "Weronika Roś",
-                    "twojastara2137": "Maks Czaja",
-                    "gawron@3": "Szymon Cabaj",
-                    "wikikapiek490": "Wiktoria Węglarz",
-                    "sigmaboy": "Ania Jezior",
-                    "kotki2": "Paulina Kliś",
-                    "342": "Ania Bochenek",
-                    "optimusprime000": "Szymon Gorczyca",
-                    "leonmadrame": "Leon Wilczyński"
+                    "342": "Ania Bochenek"
                 };
 
                 if (validUsers[password]) {
@@ -146,17 +81,28 @@
                     cell.addEventListener("keypress", function(event) {
                         if (event.key === "Enter") {
                             event.preventDefault();
+                            saveData(password, this.textContent);
                             this.blur();
-                            saveData();
                         }
                     });
                 }
             });
         }
 
-        function saveData() {
-            alert("Przezwisko zostało zapisane!");
+        function saveData(user, nickname) {
+            db.ref("nicknames/" + user).set(nickname);
+            alert("Przezwisko zapisane!");
         }
+
+        loadNicknames();
     </script>
+
+</body>
+</html>
+
+
+        loadNicknames();
+    </script>
+
 </body>
 </html>
