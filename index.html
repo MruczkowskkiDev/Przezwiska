@@ -87,7 +87,7 @@
     </div>
 
     <h2>Lista uczniów</h2>
-    <table>
+    <table id="studentsTable">
         <tr>
             <th>Imię</th>
             <th>Nazwisko</th>
@@ -112,7 +112,7 @@
     <script type="module">
         // Firebase configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
         // Konfiguracja Firebase
         const firebaseConfig = {
@@ -129,7 +129,36 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        let loggedInUser = null;
+        // Funkcja do ładowania przezwisk z Firebase
+        function loadNicknames() {
+            const nicknamesRef = ref(database, 'nicknames/');
+            get(nicknamesRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const nicknames = snapshot.val();
+                    updateNicknamesInTable(nicknames);
+                } else {
+                    console.log("Brak danych.");
+                }
+            }).catch((error) => {
+                console.error("Błąd podczas pobierania danych: ", error);
+            });
+        }
+
+        // Funkcja aktualizująca przezwiska w tabeli
+        function updateNicknamesInTable(nicknames) {
+            const cells = document.querySelectorAll(".nickname");
+            cells.forEach(cell => {
+                const userId = cell.dataset.user;
+                if (nicknames[userId]) {
+                    cell.innerText = nicknames[userId].nickname;
+                }
+            });
+        }
+
+        // Ładowanie przezwisk przy załadowaniu strony
+        window.onload = function() {
+            loadNicknames();
+        }
 
         // Funkcja pokazująca popup logowania
         window.showLogin = function() {
@@ -197,13 +226,12 @@
             set(nicknameRef, {
                 nickname: nickname
             }).then(() => {
-                alert("Przezwisko zapisane pomyślnie!");
+                alert("Przezwisko zapisane!");
             }).catch((error) => {
-                console.error("Błąd zapisu do bazy danych: ", error);
+                console.error("Błąd zapisywania przezwiska: ", error);
             });
         }
     </script>
 </body>
 
 </html>
-
