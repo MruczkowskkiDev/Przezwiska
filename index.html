@@ -112,7 +112,7 @@
     <script type="module">
         // Firebase configuration
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
         // Konfiguracja Firebase
         const firebaseConfig = {
@@ -200,6 +200,24 @@
                 alert("Przezwisko zapisane pomyślnie!");
             }).catch((error) => {
                 console.error("Błąd zapisu do bazy danych: ", error);
+            });
+        }
+
+        // Funkcja ładowania przezwisk z Firebase
+        window.onload = function() {
+            const nicknameCells = document.querySelectorAll(".nickname");
+            nicknameCells.forEach(cell => {
+                const userId = cell.dataset.user;
+                const nicknameRef = ref(database, 'nicknames/' + userId);
+                get(nicknameRef).then(snapshot => {
+                    if (snapshot.exists()) {
+                        cell.innerText = snapshot.val().nickname;
+                    } else {
+                        cell.innerText = "Brak przezwiska";
+                    }
+                }).catch((error) => {
+                    console.error("Błąd pobierania danych: ", error);
+                });
             });
         }
     </script>
