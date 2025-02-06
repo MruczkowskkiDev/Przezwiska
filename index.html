@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             background-color: #f8f8f8;
             text-align: center;
         }
+
         table {
             width: 60%;
             margin: 20px auto;
@@ -20,19 +22,24 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        th, td {
+
+        th,
+        td {
             padding: 12px;
             border: 2px solid black;
             text-align: left;
         }
+
         th {
             background-color: black;
             color: white;
             font-weight: bold;
         }
+
         td {
             font-size: 16px;
         }
+
         .login-btn {
             position: absolute;
             top: 10px;
@@ -44,6 +51,7 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
         .login-popup {
             display: none;
             position: fixed;
@@ -55,6 +63,7 @@
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
         }
+
         .login-popup input {
             width: 100%;
             padding: 8px;
@@ -64,6 +73,7 @@
         }
     </style>
 </head>
+
 <body>
     <button class="login-btn" onclick="showLogin()">Logowanie</button>
 
@@ -95,12 +105,12 @@
         <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
 
-    <!-- Firebase JS SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-database.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
+        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyDraiw8qVeCxenSX94Whz1mK0fxQZCfNLQ",
             authDomain: "lista-przezwisk.firebaseapp.com",
@@ -114,7 +124,7 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database(app);
+        const database = firebase.database();
 
         let loggedInUser = null;
 
@@ -164,23 +174,25 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData(password, this.textContent);
+                            saveData(cell);
                         }
                     });
                 }
             });
         }
 
-        function saveData(user, nickname) {
-            const userRef = database.ref('users/' + user);
-            userRef.set({
+        function saveData(cell) {
+            const nickname = cell.innerText;
+            const userId = cell.dataset.user;
+            firebase.database().ref('nicknames/' + userId).set({
                 nickname: nickname
             }).then(() => {
-                alert("Przezwisko zapisane!");
-            }).catch((error) => {
-                console.error("Błąd zapisywania przezwiska:", error);
+                alert("Przezwisko zostało zapisane!");
+            }).catch(error => {
+                console.error("Błąd zapisu: ", error);
             });
         }
     </script>
 </body>
+
 </html>
