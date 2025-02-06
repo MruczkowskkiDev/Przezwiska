@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
@@ -67,6 +71,7 @@
         }
     </style>
 </head>
+
 <body>
     <button class="login-btn" onclick="showLogin()">Logowanie</button>
 
@@ -99,6 +104,21 @@
     </table>
 
     <script>
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYtNKe3WPkMbRW8ac1UETFR9t_tdiXaxE",
+            authDomain: "przezwiska-df7d2.firebaseapp.com",
+            databaseURL: "https://przezwiska-df7d2-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "przezwiska-df7d2",
+            storageBucket: "przezwiska-df7d2.firebasestorage.app",
+            messagingSenderId: "1053934084967",
+            appId: "1:1053934084967:web:2ee5f966b34c5804e685c2"
+        };
+
+        // Inicjalizacja Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let loggedInUser = null;
 
         function showLogin() {
@@ -147,15 +167,25 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData();
+                            saveData(cell);
                         }
                     });
                 }
             });
         }
 
-        function saveData() {
-            alert("Przezwisko zostało zapisane!");
+        function saveData(cell) {
+            const nickname = cell.innerText.trim();
+            const userId = cell.dataset.user;
+
+            // Zapisz dane do Firebase
+            firebase.database().ref('nicknames/' + userId).set({
+                nickname: nickname
+            }).then(() => {
+                alert("Przezwisko zapisane pomyślnie!");
+            }).catch((error) => {
+                console.error("Błąd zapisu do bazy danych: ", error);
+            });
         }
     </script>
 </body>
