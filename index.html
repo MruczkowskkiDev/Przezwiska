@@ -95,7 +95,24 @@
         <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Inicjalizacja Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let loggedInUser = null;
 
         function showLogin() {
@@ -144,15 +161,26 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData();
+                            saveData(this);  // Przekazujemy komórkę, aby zaktualizować tylko jej zawartość
                         }
                     });
                 }
             });
         }
 
-        function saveData() {
-            alert("Przezwisko zostało zapisane!");
+        function saveData(cell) {
+            const nickname = cell.textContent.trim();
+            if (nickname) {
+                const userId = cell.dataset.user;
+                const userRef = database.ref('nicknames/' + userId);
+                userRef.set({ nickname: nickname })
+                    .then(() => {
+                        alert("Przezwisko zapisane!");
+                    })
+                    .catch((error) => {
+                        alert("Błąd zapisywania przezwiska: " + error.message);
+                    });
+            }
         }
     </script>
 </body>
