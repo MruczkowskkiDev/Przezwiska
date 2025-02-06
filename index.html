@@ -63,6 +63,25 @@
             border-radius: 5px;
         }
     </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.9.1/firebase-database.js"></script>
+    <script>
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "lista-przezwisk.firebaseapp.com",
+            databaseURL: "https://lista-przezwisk-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "lista-przezwisk",
+            storageBucket: "lista-przezwisk.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Inicjalizacja Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+    </script>
 </head>
 <body>
     <button class="login-btn" onclick="showLogin()">Logowanie</button>
@@ -144,15 +163,20 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData();
+                            saveData(cell.dataset.user, this.textContent);
                         }
                     });
                 }
             });
         }
 
-        function saveData() {
-            alert("Przezwisko zostało zapisane!");
+        function saveData(userId, nickname) {
+            const nicknameRef = firebase.database().ref('nicknames/' + userId);
+            nicknameRef.set(nickname).then(() => {
+                alert("Przezwisko zostało zapisane!");
+            }).catch(error => {
+                alert("Błąd zapisywania: " + error.message);
+            });
         }
     </script>
 </body>
