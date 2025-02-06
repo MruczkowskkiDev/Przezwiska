@@ -1,112 +1,161 @@
 <!DOCTYPE html> 
 <html lang="pl">
-<head>
-
-    <script scr="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-    <script scr="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista uczniów</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f8f8;
-            text-align: center;
-        }
-        table {
-            width: 60%;
-            margin: 20px auto;
-            border-collapse: separate;
-            border-spacing: 0;
-            background-color: #fff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 12px;
-            border: 2px solid black;
-            text-align: left;
-        }
-        th {
-            background-color: black;
-            color: white;
-            font-weight: bold;
-        }
-        td {
-            font-size: 16px;
-        }
-        .login-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            background-color: black;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .login-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
-        }
-        .login-popup input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 10px;
-            border: 2px solid black;
-            border-radius: 5px;
-        }
-    </style>
 </head>
-<body>
-    <button class="login-btn" onclick="showLogin()">Logowanie</button>
 
+<body>
+   <button class="login-btn" id="loginBtn">Logowanie</button>
+<div class="login-popup" id="loginPopup">
+    <p>Podaj hasło:</p>
+    <input type="password" id="passwordInput">
+</div>
+<script>
+    let loggedInUser = null;
+    // Funkcja pokazująca okno logowania
+    document.getElementById('loginBtn').addEventListener('click', showLogin);
+    function showLogin() {
+        document.getElementById("loginPopup").style.display = "block";
+        document.getElementById("passwordInput").focus();
+        document.getElementById("passwordInput").addEventListener("keypress", checkLogin);
+    }
+    // Funkcja sprawdzająca login
+    function checkLogin(event) {
+        if (event.key === "Enter") {
+            const password = document.getElementById("passwordInput").value;
+            const validUsers = {
+                "abhaha123": "Leon Babicz",
+                "mruczek": "Michał Ciepiela",
+                "lubieaudis3": "Jan Tokarz",
+                "rypka14!": "Gosia",
+                "pulpecik06": "Zuzia Kosiba",
+                "kocham_energylandie": "Weronika Roś",
+                "twojastara2137": "Maks Czaja",
+                "gawron@3": "Szymon Cabaj",
+                "wikikapiek490": "Wiktoria Węglarz",
+                "sigmaboy": "Ania Jezior",
+                "kotki2": "Paulina Kliś",
+                "342": "Ania Bochenek",
+                "optimusprime000": "Szymon Gorczyca",
+                "leonmadrame": "Leon Wilczyński"
+            };
+            if (validUsers[password]) {
+                loggedInUser = password;
+                alert("Zalogowano jako: " + validUsers[password]);
+                enableEditing(password);
+                document.getElementById("loginPopup").style.display = "none";
+            } else {
+                alert("Błędne hasło!");
+            }
+    <button class="login-btn" id="loginBtn">Logowanie</button>
     <div class="login-popup" id="loginPopup">
         <p>Podaj hasło:</p>
-        <input type="password" id="passwordInput" onkeypress="checkLogin(event)">
+        <input type="password" id="passwordInput">
     </div>
-
-    <h2>Lista uczniów</h2>
     <table>
-        <tr>
-            <th>Imię</th>
-            <th>Nazwisko</th>
-            <th>Przezwisko</th>
-        </tr>
-        <tr><td>Leon</td><td>Babicz</td><td class="nickname" data-user="abhaha123"></td></tr>
-        <tr><td>Ania</td><td>Bochenek</td><td class="nickname" data-user="342"></td></tr>
-        <tr><td>Szymon</td><td>Cabaj</td><td class="nickname" data-user="gawron@3"></td></tr>
-        <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
-        <tr><td>Maks</td><td>Czaja</td><td class="nickname" data-user="twojastara2137"></td></tr>
-        <tr><td>Szymon</td><td>Gorczyca</td><td class="nickname" data-user="optimusprime000"></td></tr>
-        <tr><td>Ania</td><td>Jezior</td><td class="nickname" data-user="sigmaboy"></td></tr>
-        <tr><td>Paulina</td><td>Kliś</td><td class="nickname" data-user="kotki2"></td></tr>
-        <tr><td>Jan</td><td>Tokarz</td><td class="nickname" data-user="lubieaudis3"></td></tr>
-        <tr><td>Weronika</td><td>Roś</td><td class="nickname" data-user="kocham_energylandie"></td></tr>
-        <tr><td>Leon</td><td>Wilczyński</td><td class="nickname" data-user="leonmadrame"></td></tr>
-        <tr><td>Wiktoria</td><td>Węglarz</td><td class="nickname" data-user="wikikapiek490"></td></tr>
-        <tr><td>Gosia</td><td>-</td><td class="nickname" data-user="rypka14!"></td></tr>
-        <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Przezwisko</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Leon</td>
+                <td>Babicz</td>
+                <td class="nickname" data-user="abhaha123">Leon</td>
+            </tr>
+            <tr>
+                <td>Ania</td>
+                <td>Bochenek</td>
+                <td class="nickname" data-user="342">Ania</td>
+            </tr>
+            <tr>
+                <td>Szymon</td>
+                <td>Cabaj</td>
+                <td class="nickname" data-user="gawron@3">Szymon</td>
+            </tr>
+            <tr>
+                <td>Michał</td>
+                <td>Ciepiela</td>
+                <td class="nickname" data-user="mruczek">Michał</td>
+            </tr>
+            <tr>
+                <td>Maks</td>
+                <td>Czaja</td>
+                <td class="nickname" data-user="twojastara2137">Maks</td>
+            </tr>
+            <tr>
+                <td>Szymon</td>
+                <td>Gorczyca</td>
+                <td class="nickname" data-user="optimusprime000">Szymon</td>
+            </tr>
+            <tr>
+                <td>Ania</td>
+                <td>Jezior</td>
+                <td class="nickname" data-user="sigmaboy">Ania</td>
+            </tr>
+            <tr>
+                <td>Paulina</td>
+                <td>Kliś</td>
+                <td class="nickname" data-user="kotki2">Paulina</td>
+            </tr>
+            <tr>
+                <td>Jan</td>
+                <td>Tokarz</td>
+                <td class="nickname" data-user="lubieaudis3">Jan</td>
+            </tr>
+            <tr>
+                <td>Weronika</td>
+                <td>Roś</td>
+                <td class="nickname" data-user="kocham_energylandie">Weronika</td>
+            </tr>
+            <tr>
+                <td>Leon</td>
+                <td>Wilczyński</td>
+                <td class="nickname" data-user="leonmadrame">Leon</td>
+            </tr>
+            <tr>
+                <td>Wiktoria</td>
+                <td>Węglarz</td>
+                <td class="nickname" data-user="wikikapiek490">Wiktoria</td>
+            </tr>
+            <tr>
+                <td>Gosia</td>
+                <td>-</td>
+                <td class="nickname" data-user="rypka14!">Gosia</td>
+            </tr>
+            <tr>
+                <td>Zuzia</td>
+                <td>Kosiba</td>
+                <td class="nickname" data-user="pulpecik06">Zuzia</td>
+            </tr>
+        </tbody>
     </table>
-
     <script>
         let loggedInUser = null;
-
+        // Funkcja pokazująca okno logowania
+        document.getElementById('loginBtn').addEventListener('click', showLogin);
         function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
             document.getElementById("passwordInput").focus();
+            document.getElementById("passwordInput").addEventListener("keypress", checkLogin);
         }
-
+    }
+    // Funkcja włączająca edycję przezwisk
+    function enableEditing(password) {
+        let cells = document.querySelectorAll(".nickname");
+        cells.forEach(cell => {
+            if (cell.dataset.user === password) {
+                cell.contentEditable = "true";
+                cell.style.backgroundColor = "#e0e0e0";
+                cell.addEventListener("keypress", function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        this.blur();
+                        saveData(cell);
+                    }
+                });
+        // Funkcja sprawdzająca login
         function checkLogin(event) {
             if (event.key === "Enter") {
                 const password = document.getElementById("passwordInput").value;
@@ -126,7 +175,6 @@
                     "optimusprime000": "Szymon Gorczyca",
                     "leonmadrame": "Leon Wilczyński"
                 };
-
                 if (validUsers[password]) {
                     loggedInUser = password;
                     alert("Zalogowano jako: " + validUsers[password]);
@@ -136,29 +184,48 @@
                     alert("Błędne hasło!");
                 }
             }
+        });
+    }
+    // Funkcja zapisująca zmienione dane
+    function saveData(cell) {
+        const newNickname = cell.textContent.trim();
+        const userId = cell.dataset.user;
+        // Tutaj będzie zapis do bazy danych Firebase
+        console.log(Zapisano przezwisko ${newNickname} dla użytkownika ${userId});
+        alert("Przezwisko zostało zapisane!");
+    }
+</script>
         }
-
+        // Funkcja włączająca edycję przezwisk
         function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
                 if (cell.dataset.user === password) {
                     cell.contentEditable = "true";
                     cell.style.backgroundColor = "#e0e0e0";
-                    cell.addEventListener("keypress", function(event) {
+                    cell.addEventListener("keypress", function (event) {
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData();
+                            saveData(cell);
                         }
                     });
                 }
             });
         }
-
-        function saveData() {
+        // Funkcja zapisująca zmienione dane
+        function saveData(cell) {
+            const newNickname = cell.textContent.trim();
+            const userId = cell.dataset.user;
+            // Tutaj będzie zapis do bazy danych Firebase
+            console.log(`Zapisano przezwisko ${newNickname} dla użytkownika ${userId}`);
             alert("Przezwisko zostało zapisane!");
         }
     </script>
 </body>
-</html>
 
+</html>
+0 commit comments
+Comments
+0
+ (0)
