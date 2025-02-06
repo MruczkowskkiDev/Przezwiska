@@ -5,12 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Trueno', sans-serif;
             background-color: #f8f8f8;
             text-align: center;
         }
@@ -26,7 +23,8 @@
             overflow: hidden;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             border: 2px solid black;
             text-align: left;
@@ -36,6 +34,10 @@
             background-color: black;
             color: white;
             font-weight: bold;
+        }
+
+        td {
+            font-size: 16px;
         }
 
         .login-btn {
@@ -49,83 +51,109 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
+        .login-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-popup input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 2px solid black;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
 <body>
-    <button class="login-btn" id="loginBtn">Logowanie</button>
+   <button class="login-btn" id="loginBtn">Logowanie</button>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Imię</th>
-                <th>Nazwisko</th>
-                <th>Przezwisko</th>
-            </tr>
-        </thead>
-        <tbody id="studentsTable">
-            <tr>
-                <td>Ładowanie...</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="login-popup" id="loginPopup">
+    <p>Podaj hasło:</p>
+    <input type="password" id="passwordInput">
+</div>
 
-    <script>
-        // Konfiguracja Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2DELS96WbUb4DmtuMo54OpOPkzlnCkS0",
-            authDomain: "zapis-przezwisk.firebaseapp.com",
-            databaseURL: "https://zapis-przezwisk-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "zapis-przezwisk",
-            storageBucket: "zapis-przezwisk.firebasestorage.app",
-            messagingSenderId: "742731426346",
-            appId: "1:742731426346:web:df66e6a72538e5cdcb3153",
-            measurementId: "G-978RVLP5VS"
-        };
+<script>
+    let loggedInUser = null;
 
-        // Inicjalizacja Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    // Funkcja pokazująca okno logowania
+    document.getElementById('loginBtn').addEventListener('click', showLogin);
 
-        console.log("Firebase załadowany:", firebase.apps.length > 0);
+    function showLogin() {
+        document.getElementById("loginPopup").style.display = "block";
+        document.getElementById("passwordInput").focus();
+        document.getElementById("passwordInput").addEventListener("keypress", checkLogin);
+    }
 
-        function loadNicknames() {
-            db.ref("nicknames").on("value", (snapshot) => {
-                const table = document.getElementById("studentsTable");
-                table.innerHTML = "";
-                if (!snapshot.exists()) {
-                    table.innerHTML = "<tr><td colspan='3'>Brak danych.</td></tr>";
-                    return;
-                }
-                snapshot.forEach(child => {
-                    const data = child.val();
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${data.name}</td>
-                        <td>${data.surname}</td>
-                        <td contenteditable="true" onblur="updateNickname('${child.key}', this.textContent)">
-                            ${data.nickname || 'Brak'}
-                        </td>
-                    `;
-                    table.appendChild(row);
-                });
-            }, (error) => {
-                console.error("Błąd pobierania danych:", error);
-            });
-        }
+    // Funkcja sprawdzająca login
+    function checkLogin(event) {
+        if (event.key === "Enter") {
+            const password = document.getElementById("passwordInput").value;
+            const validUsers = {
+                "abhaha123": "Leon Babicz",
+                "mruczek": "Michał Ciepiela",
+                "lubieaudis3": "Jan Tokarz",
+                "rypka14!": "Gosia",
+                "pulpecik06": "Zuzia Kosiba",
+                "kocham_energylandie": "Weronika Roś",
+                "twojastara2137": "Maks Czaja",
+                "gawron@3": "Szymon Cabaj",
+                "wikikapiek490": "Wiktoria Węglarz",
+                "sigmaboy": "Ania Jezior",
+                "kotki2": "Paulina Kliś",
+                "342": "Ania Bochenek",
+                "optimusprime000": "Szymon Gorczyca",
+                "leonmadrame": "Leon Wilczyński"
+            };
 
-        function updateNickname(id, newNickname) {
-            if (!newNickname.trim()) {
-                console.warn("Puste przezwisko - nie zapisano.");
-                return;
+            if (validUsers[password]) {
+                loggedInUser = password;
+                alert("Zalogowano jako: " + validUsers[password]);
+                enableEditing(password);
+                document.getElementById("loginPopup").style.display = "none";
+            } else {
+                alert("Błędne hasło!");
             }
-            db.ref(`nicknames/${id}/nickname`).set(newNickname)
-                .then(() => console.log("Przezwisko zapisane:", newNickname))
-                .catch(error => console.error("Błąd zapisu:", error));
         }
+    }
 
-        loadNicknames();
-    </script>
+    // Funkcja włączająca edycję przezwisk
+    function enableEditing(password) {
+        let cells = document.querySelectorAll(".nickname");
+        cells.forEach(cell => {
+            if (cell.dataset.user === password) {
+                cell.contentEditable = "true";
+                cell.style.backgroundColor = "#e0e0e0";
+                cell.addEventListener("keypress", function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        this.blur();
+                        saveData(cell);
+                    }
+                });
+            }
+        });
+    }
+
+    // Funkcja zapisująca zmienione dane
+    function saveData(cell) {
+        const newNickname = cell.textContent.trim();
+        const userId = cell.dataset.user;
+
+        // Tutaj będzie zapis do bazy danych Firebase
+        console.log(Zapisano przezwisko ${newNickname} dla użytkownika ${userId});
+        alert("Przezwisko zostało zapisane!");
+    }
+</script>
 </body>
 
 </html>
