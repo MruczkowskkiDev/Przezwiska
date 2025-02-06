@@ -75,7 +75,7 @@
 </head>
 
 <body>
-    <button class="login-btn" onclick="showLogin()">Logowanie</button>
+    <button class="login-btn" id="loginBtn">Logowanie</button>
 
     <div class="login-popup" id="loginPopup">
         <p>Podaj hasło:</p>
@@ -128,11 +128,13 @@
 
         let loggedInUser = null;
 
+        // Function for showing login popup
         function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
             document.getElementById("passwordInput").focus();
         }
 
+        // Check password input and log user in
         function checkLogin(event) {
             if (event.key === "Enter") {
                 const password = document.getElementById("passwordInput").value;
@@ -164,6 +166,7 @@
             }
         }
 
+        // Enable editing for logged-in user
         function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
@@ -181,6 +184,7 @@
             });
         }
 
+        // Save data to Firebase
         function saveData(cell) {
             const nickname = cell.innerText;
             const userId = cell.dataset.user;
@@ -192,6 +196,12 @@
                 alert("Wystąpił błąd: " + error);
             });
         }
+
+        // Adding event listener to login button after DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginBtn = document.getElementById("loginBtn");
+            loginBtn.addEventListener("click", showLogin);
+        });
     </script>
 </body>
 
