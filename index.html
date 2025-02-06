@@ -95,13 +95,12 @@
         <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
 
-    <!-- Dodanie Firebase SDK -->
+    <!-- Firebase JS SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
 
-    <script type="module">
-        // Firebase configuration
+    <script>
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDraiw8qVeCxenSX94Whz1mK0fxQZCfNLQ",
             authDomain: "lista-przezwisk.firebaseapp.com",
@@ -115,18 +114,15 @@
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.analytics();
-        const database = firebase.database();
+        const database = firebase.database(app);
 
         let loggedInUser = null;
 
-        // Pokazuje popup logowania
         function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
             document.getElementById("passwordInput").focus();
         }
 
-        // Sprawdza login
         function checkLogin(event) {
             if (event.key === "Enter") {
                 const password = document.getElementById("passwordInput").value;
@@ -158,7 +154,6 @@
             }
         }
 
-        // Włącza edycję po zalogowaniu
         function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
@@ -169,25 +164,23 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData(this);  // Zapisz dane do Firebase
+                            saveData(password, this.textContent);
                         }
                     });
                 }
             });
         }
 
-        // Zapisuje dane do Firebase
-        function saveData(cell) {
-            const userRef = database.ref('nicknames/' + cell.dataset.user);
+        function saveData(user, nickname) {
+            const userRef = database.ref('users/' + user);
             userRef.set({
-                nickname: cell.textContent
+                nickname: nickname
             }).then(() => {
                 alert("Przezwisko zapisane!");
             }).catch((error) => {
-                alert("Błąd zapisu: " + error.message);
+                console.error("Błąd zapisywania przezwiska:", error);
             });
         }
     </script>
 </body>
 </html>
-
