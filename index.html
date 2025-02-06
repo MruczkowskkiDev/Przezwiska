@@ -87,7 +87,7 @@
     </div>
 
     <h2>Lista uczniów</h2>
-    <table id="studentsTable">
+    <table>
         <tr>
             <th>Imię</th>
             <th>Nazwisko</th>
@@ -207,21 +207,6 @@
                 console.error("Błąd zapisu do bazy danych: ", error);
             });
         }
-
-        // Funkcja sortująca uczniów alfabetycznie po nazwisku
-        window.sortTable = function() {
-            const table = document.getElementById("studentsTable");
-            const rows = Array.from(table.getElementsByTagName("tr")).slice(1); // Pobierz wszystkie wiersze, z wyjątkiem nagłówka
-            rows.sort((rowA, rowB) => {
-                const lastNameA = rowA.cells[1].innerText;
-                const lastNameB = rowB.cells[1].innerText;
-                return lastNameA.localeCompare(lastNameB);
-            });
-            rows.forEach(row => table.appendChild(row)); // Dodaj wiersze ponownie w posortowanej kolejności
-        }
-
-        // Wywołaj sortowanie po załadowaniu strony
-        window.onload = sortTable;
     </script>
 </body>
 
