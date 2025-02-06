@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
-    <link href="https://fonts.googleapis.com/css2?family=Trueno&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Trueno', sans-serif;
             background-color: #f8f8f8;
             text-align: center;
         }
+
         table {
             width: 60%;
             margin: 20px auto;
@@ -21,19 +22,24 @@
             border-radius: 10px;
             overflow: hidden;
         }
-        th, td {
+
+        th,
+        td {
             padding: 12px;
             border: 2px solid black;
             text-align: left;
         }
+
         th {
             background-color: black;
             color: white;
             font-weight: bold;
         }
+
         td {
             font-size: 16px;
         }
+
         .login-btn {
             position: absolute;
             top: 10px;
@@ -45,6 +51,7 @@
             cursor: pointer;
             border-radius: 5px;
         }
+
         .login-popup {
             display: none;
             position: fixed;
@@ -56,6 +63,7 @@
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
         }
+
         .login-popup input {
             width: 100%;
             padding: 8px;
@@ -65,6 +73,7 @@
         }
     </style>
 </head>
+
 <body>
     <button class="login-btn" onclick="showLogin()">Logowanie</button>
 
@@ -74,19 +83,34 @@
     </div>
 
     <h2>Lista uczniów</h2>
-    <table id="studentsTable">
+    <table>
         <tr>
             <th>Imię</th>
             <th>Nazwisko</th>
             <th>Przezwisko</th>
         </tr>
-        <!-- Wiersze zostaną wczytane dynamicznie z Firebase -->
+        <tr><td>Leon</td><td>Babicz</td><td class="nickname" data-user="abhaha123"></td></tr>
+        <tr><td>Ania</td><td>Bochenek</td><td class="nickname" data-user="342"></td></tr>
+        <tr><td>Szymon</td><td>Cabaj</td><td class="nickname" data-user="gawron@3"></td></tr>
+        <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
+        <tr><td>Maks</td><td>Czaja</td><td class="nickname" data-user="twojastara2137"></td></tr>
+        <tr><td>Szymon</td><td>Gorczyca</td><td class="nickname" data-user="optimusprime000"></td></tr>
+        <tr><td>Ania</td><td>Jezior</td><td class="nickname" data-user="sigmaboy"></td></tr>
+        <tr><td>Paulina</td><td>Kliś</td><td class="nickname" data-user="kotki2"></td></tr>
+        <tr><td>Jan</td><td>Tokarz</td><td class="nickname" data-user="lubieaudis3"></td></tr>
+        <tr><td>Weronika</td><td>Roś</td><td class="nickname" data-user="kocham_energylandie"></td></tr>
+        <tr><td>Leon</td><td>Wilczyński</td><td class="nickname" data-user="leonmadrame"></td></tr>
+        <tr><td>Wiktoria</td><td>Węglarz</td><td class="nickname" data-user="wikikapiek490"></td></tr>
+        <tr><td>Gosia</td><td>-</td><td class="nickname" data-user="rypka14!"></td></tr>
+        <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
 
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
-    <script>
-        // Konfiguracja Firebase
+    <!-- Firebase Scripts for version 11.2.0 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+
+        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyD2DELS96WbUb4DmtuMo54OpOPkzlnCkS0",
             authDomain: "zapis-przezwisk.firebaseapp.com",
@@ -98,8 +122,9 @@
             measurementId: "G-978RVLP5VS"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
         let loggedInUser = null;
 
@@ -139,56 +164,35 @@
             }
         }
 
-        // Funkcja wczytująca dane uczniów z Firebase
-        function loadStudents() {
-            const studentsRef = database.ref('students');
-            studentsRef.on('value', (snapshot) => {
-                const students = snapshot.val();
-                const table = document.getElementById('studentsTable');
-                table.innerHTML = '<tr><th>Imię</th><th>Nazwisko</th><th>Przezwisko</th></tr>'; // Nagłówki
-
-                for (const key in students) {
-                    const student = students[key];
-                    const row = document.createElement('tr');
-
-                    row.innerHTML = `
-                        <td>${student.firstName}</td>
-                        <td>${student.lastName}</td>
-                        <td class="nickname" data-user="${key}" contenteditable="false">${student.nickname}</td>
-                    `;
-                    table.appendChild(row);
-                }
-            });
-        }
-
-        // Funkcja umożliwiająca edytowanie przezwisk
         function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
                 if (cell.dataset.user === password) {
                     cell.contentEditable = "true";
                     cell.style.backgroundColor = "#e0e0e0";
-                    cell.addEventListener("blur", function() {
-                        saveData(cell.dataset.user, this.textContent);
+                    cell.addEventListener("keypress", function (event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            this.blur();
+                            saveData(cell);
+                        }
                     });
                 }
             });
         }
 
-        // Funkcja zapisująca zmiany w Firebase
-        function saveData(userId, newNickname) {
-            const userRef = database.ref('students/' + userId);
-            userRef.update({
-                nickname: newNickname
+        function saveData(cell) {
+            const nickname = cell.innerText;
+            const userId = cell.dataset.user;
+            set(ref(db, 'nicknames/' + userId), {
+                nickname: nickname
             }).then(() => {
                 alert("Przezwisko zostało zapisane!");
-            }).catch(error => {
-                alert("Błąd podczas zapisywania danych: " + error.message);
+            }).catch((error) => {
+                alert("Wystąpił błąd: " + error);
             });
         }
-
-        // Ładowanie uczniów przy załadowaniu strony
-        loadStudents();
     </script>
 </body>
+
 </html>
