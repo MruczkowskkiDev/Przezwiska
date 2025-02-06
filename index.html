@@ -1,6 +1,10 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pl">
 <head>
+    <!-- Dodaj Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
@@ -96,6 +100,22 @@
     </table>
 
     <script>
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD2DELS96WbUb4DmtuMo54OpOPkzlnCkS0",
+            authDomain: "zapis-przezwisk.firebaseapp.com",
+            databaseURL: "https://zapis-przezwisk-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "zapis-przezwisk",
+            storageBucket: "zapis-przezwisk.firebasestorage.app",
+            messagingSenderId: "742731426346",
+            appId: "1:742731426346:web:df66e6a72538e5cdcb3153",
+            measurementId: "G-978RVLP5VS"
+        };
+        
+        // Inicjalizacja Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let loggedInUser = null;
 
         function showLogin() {
@@ -144,19 +164,24 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData();
+                            saveData(cell.dataset.user, this.textContent);
                         }
                     });
                 }
             });
         }
 
-        function saveData() {
-            alert("Przezwisko zostało zapisane!");
+        function saveData(userId, newNickname) {
+            // Zapisz dane do Firebase Realtime Database
+            const userRef = database.ref('users/' + userId);
+            userRef.set({
+                nickname: newNickname
+            }).then(() => {
+                alert("Przezwisko zostało zapisane!");
+            }).catch(error => {
+                alert("Błąd podczas zapisywania danych: " + error.message);
+            });
         }
     </script>
 </body>
 </html>
-
-
-dodaj do tego skryptu zapisywanie w realtime database
