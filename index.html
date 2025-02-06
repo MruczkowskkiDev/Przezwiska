@@ -2,9 +2,98 @@
 <html lang="pl">
 
 <head>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
-    
+    <!-- Załaduj Firebase jako moduł -->
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+        
+        // Konfiguracja Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYtNKe3WPkMbRW8ac1UETFR9t_tdiXaxE",
+            authDomain: "przezwiska-df7d2.firebaseapp.com",
+            databaseURL: "https://przezwiska-df7d2-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "przezwiska-df7d2",
+            storageBucket: "przezwiska-df7d2.firebasestorage.app",
+            messagingSenderId: "1053934084967",
+            appId: "1:1053934084967:web:2ee5f966b34c5804e685c2"
+        };
+
+        // Inicjalizacja Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let loggedInUser = null;
+
+        function showLogin() {
+            document.getElementById("loginPopup").style.display = "block";
+            document.getElementById("passwordInput").focus();
+        }
+
+        function checkLogin(event) {
+            if (event.key === "Enter") {
+                const password = document.getElementById("passwordInput").value;
+                const validUsers = {
+                    "abhaha123": "Leon Babicz",
+                    "mruczek": "Michał Ciepiela",
+                    "lubieaudis3": "Jan Tokarz",
+                    "rypka14!": "Gosia",
+                    "pulpecik06": "Zuzia Kosiba",
+                    "kocham_energylandie": "Weronika Roś",
+                    "twojastara2137": "Maks Czaja",
+                    "gawron@3": "Szymon Cabaj",
+                    "wikikapiek490": "Wiktoria Węglarz",
+                    "sigmaboy": "Ania Jezior",
+                    "kotki2": "Paulina Kliś",
+                    "342": "Ania Bochenek",
+                    "optimusprime000": "Szymon Gorczyca",
+                    "leonmadrame": "Leon Wilczyński"
+                };
+
+                if (validUsers[password]) {
+                    loggedInUser = password;
+                    alert("Zalogowano jako: " + validUsers[password]);
+                    enableEditing(password);
+                    document.getElementById("loginPopup").style.display = "none";
+                } else {
+                    alert("Błędne hasło!");
+                }
+            }
+        }
+
+        function enableEditing(password) {
+            let cells = document.querySelectorAll(".nickname");
+            cells.forEach(cell => {
+                if (cell.dataset.user === password) {
+                    cell.contentEditable = "true";
+                    cell.style.backgroundColor = "#e0e0e0";
+                    cell.addEventListener("keypress", function(event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            this.blur();
+                            saveData(cell);
+                        }
+                    });
+                }
+            });
+        }
+
+        function saveData(cell) {
+            const nickname = cell.innerText.trim();
+            const userId = cell.dataset.user;
+
+            // Zapisz dane do Firebase
+            const nicknameRef = ref(database, 'nicknames/' + userId);
+            set(nicknameRef, {
+                nickname: nickname
+            }).then(() => {
+                alert("Przezwisko zapisane pomyślnie!");
+            }).catch((error) => {
+                console.error("Błąd zapisu do bazy danych: ", error);
+            });
+        }
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
@@ -102,91 +191,6 @@
         <tr><td>Gosia</td><td>-</td><td class="nickname" data-user="rypka14!"></td></tr>
         <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
-
-    <script>
-        // Konfiguracja Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYtNKe3WPkMbRW8ac1UETFR9t_tdiXaxE",
-            authDomain: "przezwiska-df7d2.firebaseapp.com",
-            databaseURL: "https://przezwiska-df7d2-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "przezwiska-df7d2",
-            storageBucket: "przezwiska-df7d2.firebasestorage.app",
-            messagingSenderId: "1053934084967",
-            appId: "1:1053934084967:web:2ee5f966b34c5804e685c2"
-        };
-
-        // Inicjalizacja Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        let loggedInUser = null;
-
-        function showLogin() {
-            document.getElementById("loginPopup").style.display = "block";
-            document.getElementById("passwordInput").focus();
-        }
-
-        function checkLogin(event) {
-            if (event.key === "Enter") {
-                const password = document.getElementById("passwordInput").value;
-                const validUsers = {
-                    "abhaha123": "Leon Babicz",
-                    "mruczek": "Michał Ciepiela",
-                    "lubieaudis3": "Jan Tokarz",
-                    "rypka14!": "Gosia",
-                    "pulpecik06": "Zuzia Kosiba",
-                    "kocham_energylandie": "Weronika Roś",
-                    "twojastara2137": "Maks Czaja",
-                    "gawron@3": "Szymon Cabaj",
-                    "wikikapiek490": "Wiktoria Węglarz",
-                    "sigmaboy": "Ania Jezior",
-                    "kotki2": "Paulina Kliś",
-                    "342": "Ania Bochenek",
-                    "optimusprime000": "Szymon Gorczyca",
-                    "leonmadrame": "Leon Wilczyński"
-                };
-
-                if (validUsers[password]) {
-                    loggedInUser = password;
-                    alert("Zalogowano jako: " + validUsers[password]);
-                    enableEditing(password);
-                    document.getElementById("loginPopup").style.display = "none";
-                } else {
-                    alert("Błędne hasło!");
-                }
-            }
-        }
-
-        function enableEditing(password) {
-            let cells = document.querySelectorAll(".nickname");
-            cells.forEach(cell => {
-                if (cell.dataset.user === password) {
-                    cell.contentEditable = "true";
-                    cell.style.backgroundColor = "#e0e0e0";
-                    cell.addEventListener("keypress", function(event) {
-                        if (event.key === "Enter") {
-                            event.preventDefault();
-                            this.blur();
-                            saveData(cell);
-                        }
-                    });
-                }
-            });
-        }
-
-        function saveData(cell) {
-            const nickname = cell.innerText.trim();
-            const userId = cell.dataset.user;
-
-            // Zapisz dane do Firebase
-            firebase.database().ref('nicknames/' + userId).set({
-                nickname: nickname
-            }).then(() => {
-                alert("Przezwisko zapisane pomyślnie!");
-            }).catch((error) => {
-                console.error("Błąd zapisu do bazy danych: ", error);
-            });
-        }
-    </script>
 </body>
+
 </html>
