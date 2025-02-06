@@ -7,6 +7,7 @@
     <title>Lista uczniów</title>
     <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,25 +82,46 @@
             appId: "1:742731426346:web:df66e6a72538e5cdcb3153",
             measurementId: "G-978RVLP5VS"
         };
+
+        // Inicjalizacja Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        console.log("Firebase załadowany:", firebase.apps.length > 0);
 
         function loadNicknames() {
             db.ref("nicknames").on("value", (snapshot) => {
                 const table = document.getElementById("studentsTable");
                 table.innerHTML = "";
+                if (!snapshot.exists()) {
+                    table.innerHTML = "<tr><td colspan='3'>Brak danych.</td></tr>";
+                    return;
+                }
                 snapshot.forEach(child => {
                     const data = child.val();
                     const row = document.createElement("tr");
-                    row.innerHTML = `<td>${data.name}</td><td>${data.surname}</td><td contenteditable="true" onblur="updateNickname('${child.key}', this.textContent)">${data.nickname}</td>`;
+                    row.innerHTML = `
+                        <td>${data.name}</td>
+                        <td>${data.surname}</td>
+                        <td contenteditable="true" onblur="updateNickname('${child.key}', this.textContent)">
+                            ${data.nickname || 'Brak'}
+                        </td>
+                    `;
                     table.appendChild(row);
                 });
+            }, (error) => {
+                console.error("Błąd pobierania danych:", error);
             });
         }
 
         function updateNickname(id, newNickname) {
-            db.ref(`nicknames/${id}/nickname`).set(newNickname);
-            alert("Przezwisko zostało zaktualizowane!");
+            if (!newNickname.trim()) {
+                console.warn("Puste przezwisko - nie zapisano.");
+                return;
+            }
+            db.ref(`nicknames/${id}/nickname`).set(newNickname)
+                .then(() => console.log("Przezwisko zapisane:", newNickname))
+                .catch(error => console.error("Błąd zapisu:", error));
         }
 
         loadNicknames();
@@ -107,4 +129,3 @@
 </body>
 
 </html>
-
