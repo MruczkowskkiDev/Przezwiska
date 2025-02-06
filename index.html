@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista uczniów</title>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -23,8 +28,7 @@
             overflow: hidden;
         }
 
-        th,
-        td {
+        th, td {
             padding: 12px;
             border: 2px solid black;
             text-align: left;
@@ -93,6 +97,7 @@
             <th>Nazwisko</th>
             <th>Przezwisko</th>
         </tr>
+        <!-- Wiersze tabeli będą wypełniane dynamicznie -->
         <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
         <tr><td>Szymon</td><td>Cabaj</td><td class="nickname" data-user="gawron@3"></td></tr>
         <tr><td>Szymon</td><td>Gorczyca</td><td class="nickname" data-user="optimusprime000"></td></tr>
@@ -109,12 +114,7 @@
         <tr><td>Zuzia</td><td>Kosiba</td><td class="nickname" data-user="pulpecik06"></td></tr>
     </table>
 
-    <script type="module">
-        // Firebase configuration
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
-
-        // Konfiguracja Firebase
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyAYtNKe3WPkMbRW8ac1UETFR9t_tdiXaxE",
             authDomain: "przezwiska-df7d2.firebaseapp.com",
@@ -126,19 +126,17 @@
         };
 
         // Inicjalizacja Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         let loggedInUser = null;
 
-        // Funkcja pokazująca popup logowania
-        window.showLogin = function() {
+        function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
             document.getElementById("passwordInput").focus();
         }
 
-        // Funkcja sprawdzająca poprawność hasła
-        window.checkLogin = function(event) {
+        function checkLogin(event) {
             if (event.key === "Enter") {
                 const password = document.getElementById("passwordInput").value;
                 const validUsers = {
@@ -169,8 +167,7 @@
             }
         }
 
-        // Funkcja umożliwiająca edytowanie przezwiska
-        window.enableEditing = function(password) {
+        function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
                 if (cell.dataset.user === password) {
@@ -180,29 +177,42 @@
                         if (event.key === "Enter") {
                             event.preventDefault();
                             this.blur();
-                            saveData(cell);
+                            saveData(password, this);
                         }
                     });
                 }
             });
         }
 
-        // Funkcja zapisująca dane do Firebase
-        window.saveData = function(cell) {
-            const nickname = cell.innerText.trim();
-            const userId = cell.dataset.user;
-
-            // Zapisz dane do Firebase
-            const nicknameRef = ref(database, 'nicknames/' + userId);
-            set(nicknameRef, {
-                nickname: nickname
+        function saveData(userId, cell) {
+            const newNickname = cell.textContent;
+            firebase.database().ref('nicknames/' + userId).set({
+                nickname: newNickname
             }).then(() => {
-                alert("Przezwisko zapisane pomyślnie!");
+                alert("Przezwisko zapisane!");
             }).catch((error) => {
-                console.error("Błąd zapisu do bazy danych: ", error);
+                console.error("Błąd zapisu do bazy danych:", error);
             });
+        }
+
+        function loadNicknames() {
+            const nicknamesRef = database.ref('nicknames');
+            nicknamesRef.once('value', (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const userId = childSnapshot.key;
+                    const nickname = childSnapshot.val().nickname;
+                    const nicknameCell = document.querySelector(`.nickname[data-user="${userId}"]`);
+                    if (nicknameCell) {
+                        nicknameCell.textContent = nickname;
+                    }
+                });
+            });
+        }
+
+        // Ładowanie przezwisk po załadowaniu strony
+        window.onload = function() {
+            loadNicknames();
         }
     </script>
 </body>
-
 </html>
