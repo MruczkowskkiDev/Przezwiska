@@ -3,26 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista uczniów</title>
+    <title>Lista uczniów - Przezwiska</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .nickname {
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        .nickname[contenteditable="true"] {
+            background-color: #e0e0e0;
+        }
+        #loginPopup {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #loginPopup input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        #loginPopup button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
     <button onclick="showLogin()">Logowanie</button>
-    <div id="loginPopup" style="display:none;">
-        <input type="password" id="passwordInput" onkeypress="checkLogin(event)">
+    <div id="loginPopup">
+        <input type="password" id="passwordInput" placeholder="Wpisz hasło" onkeypress="checkLogin(event)">
+        <button onclick="checkLogin({key: 'Enter'})">Zaloguj</button>
     </div>
 
     <h2>Lista uczniów</h2>
-    <table border="1">
+    <table>
         <tr><th>Imię</th><th>Nazwisko</th><th>Przezwisko</th></tr>
         <tr><td>Leon</td><td>Babicz</td><td class="nickname" data-user="abhaha123"></td></tr>
         <tr><td>Ania</td><td>Bochenek</td><td class="nickname" data-user="342"></td></tr>
         <tr><td>Michał</td><td>Ciepiela</td><td class="nickname" data-user="mruczek"></td></tr>
+        <tr><td>Szymon</td><td>Cabaj</td><td class="nickname" data-user="gawron@3"></td></tr>
+        <tr><td>Weronika</td><td>Roś</td><td class="nickname" data-user="kocham_energylandie"></td></tr>
     </table>
 
     <script>
+        // Konfiguracja Firebase
         const firebaseConfig = {
             apiKey: "TWOJE_API_KEY",
             authDomain: "lista-przezwisk.firebaseapp.com",
@@ -33,32 +82,38 @@
             appId: "TWOJE_APP_ID"
         };
 
+        // Inicjalizacja Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         let loggedInUser = null;
 
+        // Funkcja ładująca przezwiska z Firebase
         function loadNicknames() {
             db.ref("nicknames").once("value", (snapshot) => {
-                let data = snapshot.val();
+                const data = snapshot.val();
                 document.querySelectorAll(".nickname").forEach(td => {
-                    let user = td.dataset.user;
+                    const user = td.dataset.user;
                     td.textContent = data && data[user] ? data[user] : "";
                 });
             });
         }
 
+        // Funkcja pokazująca popup logowania
         function showLogin() {
             document.getElementById("loginPopup").style.display = "block";
             document.getElementById("passwordInput").focus();
         }
 
+        // Funkcja sprawdzająca logowanie
         function checkLogin(event) {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" || event.key === undefined) {
                 const password = document.getElementById("passwordInput").value;
                 const validUsers = {
                     "abhaha123": "Leon Babicz",
                     "mruczek": "Michał Ciepiela",
-                    "342": "Ania Bochenek"
+                    "342": "Ania Bochenek",
+                    "gawron@3": "Szymon Cabaj",
+                    "kocham_energylandie": "Weronika Roś"
                 };
 
                 if (validUsers[password]) {
@@ -72,6 +127,7 @@
             }
         }
 
+        // Funkcja umożliwiająca edytowanie przezwiska
         function enableEditing(password) {
             let cells = document.querySelectorAll(".nickname");
             cells.forEach(cell => {
@@ -89,18 +145,13 @@
             });
         }
 
+        // Funkcja zapisująca zmienione przezwisko
         function saveData(user, nickname) {
             db.ref("nicknames/" + user).set(nickname);
             alert("Przezwisko zapisane!");
         }
 
-        loadNicknames();
-    </script>
-
-</body>
-</html>
-
-
+        // Ładowanie przezwisk przy starcie
         loadNicknames();
     </script>
 
