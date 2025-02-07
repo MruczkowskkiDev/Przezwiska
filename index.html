@@ -149,12 +149,12 @@
                 .then(() => alert("Przezwisko zapisane pomyślnie!"))
                 .catch(error => console.error("Błąd zapisu do bazy danych: ", error));
         }
-        window.onload = function() {
+       window.onload = function() {
             document.querySelectorAll(".nickname").forEach(cell => {
                 const userId = cell.dataset.user;
-                const nicknameRef = ref(database, 'nicknames/' + userId);
+                        const nicknameRef = ref(database, 'nicknames/' + userId);
                 get(nicknameRef).then(snapshot => {
-                    if (snapshot.exists()) {
+                    if (snapshot.exists() && snapshot.val().nickname.trim() !== "") {
                         cell.innerText = snapshot.val().nickname;
                     } else {
                         cell.innerText = "Brak przezwiska";
@@ -162,6 +162,7 @@
                 }).catch(error => console.error("Błąd pobierania danych: ", error));
             });
         }
+
     </script>
 </body>
 </html>
