@@ -152,16 +152,22 @@
        window.onload = function() {
             document.querySelectorAll(".nickname").forEach(cell => {
                 const userId = cell.dataset.user;
-                        const nicknameRef = ref(database, 'nicknames/' + userId);
+                const nicknameRef = ref(database, 'nicknames/' + userId);
                 get(nicknameRef).then(snapshot => {
-                    if (snapshot.exists() && snapshot.val().nickname.trim() !== "") {
-                        cell.innerText = snapshot.val().nickname;
+                    const nickname = snapshot.exists() ? snapshot.val().nickname.trim() : "";
+                    if (nickname !== "") {
+                        cell.innerText = nickname;
                     } else {
                         cell.innerText = "Brak przezwiska";
-                    }
-                }).catch(error => console.error("Błąd pobierania danych: ", error));
-            });
-        }
+                        // Usuwamy puste przezwisko z Firebase
+                        update(nicknameRef, { nickname: null })
+                            .then(() => console.log("Puste przezwisko usunięte z Firebase"))
+                            .catch(error => console.error("Błąd podczas usuwania przezwiska z Firebase: ", error));
+           }
+        }).catch(error => console.error("Błąd pobierania danych: ", error));
+    });
+}
+
 
     </script>
 </body>
